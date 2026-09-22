@@ -9,16 +9,19 @@
   "scripts": {
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev:backend": "npm run dev --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
     "build": "npm run build --workspace=frontend",
     "start": "node backend/server.js"
   },
   "dependencies": {
+    "@vitejs/plugin-react": "^4.0.3",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.2",
-    "socket.io": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "vite": "^4.4.5"
   }
 }
