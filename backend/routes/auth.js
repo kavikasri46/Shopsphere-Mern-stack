@@ -20,7 +20,14 @@ router.post('/register', async (req, res) => {
 
     // Check MongoDB connection
     if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ message: 'Database connection not available. Please check MongoDB connection.' });
+      if (!process.env.MONGODB_URI) {
+        return res.status(503).json({ 
+          message: 'Database connection failed: MONGODB_URI environment variable is missing on Vercel. Please add your MongoDB Atlas connection string in Vercel Project Settings > Environment Variables.' 
+        });
+      }
+      return res.status(503).json({ 
+        message: 'Database connection not available. Please ensure your MongoDB Atlas IP Access List allows connections from anywhere (0.0.0.0/0).' 
+      });
     }
 
     // Check if user already exists
@@ -105,7 +112,14 @@ router.post('/login', async (req, res) => {
 
     // Check MongoDB connection
     if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ message: 'Database connection not available. Please check MongoDB connection.' });
+      if (!process.env.MONGODB_URI) {
+        return res.status(503).json({ 
+          message: 'Database connection failed: MONGODB_URI environment variable is missing on Vercel. Please add your MongoDB Atlas connection string in Vercel Project Settings > Environment Variables.' 
+        });
+      }
+      return res.status(503).json({ 
+        message: 'Database connection not available. Please ensure your MongoDB Atlas IP Access List allows connections from anywhere (0.0.0.0/0).' 
+      });
     }
 
     // Find user by email

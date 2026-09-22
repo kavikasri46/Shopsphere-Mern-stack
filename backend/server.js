@@ -78,7 +78,14 @@ const connectDB = async () => {
   }
 
   if (cachedConnection) {
-    return cachedConnection;
+    try {
+      await cachedConnection;
+      if (mongoose.connection.readyState === 1) {
+        return mongoose.connection;
+      }
+    } catch (e) {
+      cachedConnection = null;
+    }
   }
 
   try {
@@ -88,10 +95,9 @@ const connectDB = async () => {
     }
 
     cachedConnection = mongoose.connect(mongoURI, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
     }).then((conn) => {
-      console.log(`✓ MongoDB connected successfully: ${conn.connection.host}`);
-      console.log(`✓ Database: ${conn.connection.name}`);
+      console.log(`✓ MongoDB connected successfully`);
       return conn;
     }).catch((err) => {
       cachedConnection = null;
@@ -101,6 +107,7 @@ const connectDB = async () => {
 
     return await cachedConnection;
   } catch (err) {
+    cachedConnection = null;
     console.error('✗ Failed to connect to MongoDB:', err.message);
   }
 };
