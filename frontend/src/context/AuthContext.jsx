@@ -47,7 +47,7 @@ export function AuthProvider({ children }) {
         errorMessage = error.response.data?.message || `Server error: ${error.response.status}`;
       } else if (error.request) {
         // Request was made but no response received
-        errorMessage = 'Cannot connect to server. Please ensure the backend server is running on port 5000.';
+        errorMessage = 'Cannot connect to server. Please ensure the backend is running and accessible.';
       } else {
         // Something else happened
         errorMessage = error.message || 'An unexpected error occurred';
@@ -96,7 +96,7 @@ export function AuthProvider({ children }) {
         }
       } else if (error.request) {
         // Request was made but no response received
-        errorMessage = 'Cannot connect to server. Please ensure the backend server is running on port 5000.';
+        errorMessage = 'Cannot connect to server. Please ensure the backend is running and accessible.';
       } else {
         // Something else happened
         errorMessage = error.message || 'An unexpected error occurred';
