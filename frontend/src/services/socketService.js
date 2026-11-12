@@ -10,7 +10,20 @@ class SocketService {
       return this.socket;
     }
 
-    const socketURL = import.meta.env.VITE_SOCKET_URL || (import.meta.env.DEV ? 'http://localhost:5000' : (typeof window !== 'undefined' ? window.location.origin : ''));
+    const resolveSocketUrl = () => {
+      if (import.meta.env.VITE_SOCKET_URL?.trim()) {
+        return import.meta.env.VITE_SOCKET_URL.trim().replace(/\/+$/, '');
+      }
+      if (import.meta.env.VITE_API_URL?.trim()) {
+        return import.meta.env.VITE_API_URL.trim().replace(/\/+$/, '').replace(/\/api$/, '');
+      }
+      if (import.meta.env.DEV) {
+        return 'http://localhost:5000';
+      }
+      return typeof window !== 'undefined' ? window.location.origin : '';
+    };
+
+    const socketURL = resolveSocketUrl();
 
     this.socket = io(socketURL, {
       transports: ['websocket', 'polling'],

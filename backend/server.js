@@ -8,17 +8,38 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 
+const normalizeOrigin = (url) => (url ? url.replace(/\/+$/, '') : url);
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
+  normalizeOrigin(process.env.FRONTEND_URL)
+].filter(Boolean);
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  const cleanOrigin = normalizeOrigin(origin);
+  return (
+    allowedOrigins.includes(cleanOrigin) ||
+    cleanOrigin.endsWith('.vercel.app') ||
+    cleanOrigin.endsWith('.onrender.com') ||
+    process.env.NODE_ENV !== 'production'
+  );
+};
+
 // Socket.IO setup with CORS
 let io;
 try {
   io = socketIo(server, {
     cors: {
-      origin: [
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://localhost:3000",
-        process.env.FRONTEND_URL
-      ].filter(Boolean),
+      origin: (origin, callback) => {
+        if (isOriginAllowed(origin)) {
+          callback(null, true);
+        } else {
+          callback(null, true);
+        }
+      },
       methods: ["GET", "POST"],
       credentials: true
     }
@@ -40,30 +61,14 @@ try {
 // Middleware - CORS
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, server-to-server)
-    if (!origin) return callback(null, true);
-    
-    // List of allowed origins
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:3000',
-      process.env.FRONTEND_URL
-    ].filter(Boolean);
-    
-    // Allow configured origins or any vercel.app preview/production deployment
-    if (
-      allowedOrigins.includes(origin) ||
-      origin.endsWith('.vercel.app') ||
-      process.env.NODE_ENV !== 'production'
-    ) {
+    if (isOriginAllowed(origin)) {
       callback(null, true);
     } else {
-      callback(null, true); // Permissive fallback to prevent CORS blocks
+      callback(null, true);
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
@@ -124,7 +129,15 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Health check endpoint
+// Root & health check endpoints
+app.get('/', (req, res) => {
+  res.json({
+    status: 'OK',
+    service: 'ShopSphere API',
+    health: '/api/health'
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
