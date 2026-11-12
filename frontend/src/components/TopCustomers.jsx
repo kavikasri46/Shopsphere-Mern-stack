@@ -25,6 +25,10 @@ function TopCustomers({ topCustomers }) {
                   <span className="stat-label">Orders</span>
                   <span className="stat-value">{customer.orderCount || 0}</span>
                 </div>
+                <div className="stat-item">
+                  <span className="stat-label">Avg Order</span>
+                  <span className="stat-value">${customer.averageOrderValue?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}</span>
+                </div>
               </div>
             </div>
           ))}

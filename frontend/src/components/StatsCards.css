@@ -81,6 +81,11 @@
   color: #084298;
 }
 
+.status-item.cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
 @media (max-width: 768px) {
   .stats-cards {
     grid-template-columns: 1fr;

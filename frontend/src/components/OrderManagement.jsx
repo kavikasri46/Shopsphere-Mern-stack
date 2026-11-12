@@ -146,6 +146,7 @@ function OrderManagement({ onOrderChange }) {
               <thead>
                 <tr>
                   <th>Product</th>
+                  <th>Customer</th>
                   <th>Amount</th>
                   <th>Status</th>
                   <th>Created At</th>
@@ -156,6 +157,7 @@ function OrderManagement({ onOrderChange }) {
                 {orders.map((order) => (
                   <tr key={order._id}>
                     <td>{order.product}</td>
+                    <td>{order.userId?.username || 'Deleted User'}</td>
                     <td>${order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td>
                       <select

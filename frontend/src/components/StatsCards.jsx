@@ -1,13 +1,25 @@
 import React from 'react';
 import './StatsCards.css';
 
-function StatsCards({ totalRevenue, totalOrders, statusDistribution }) {
+function StatsCards({
+  totalRevenue = 0,
+  totalOrders = 0,
+  pendingRevenue = 0,
+  completionRate = 0,
+  cancellationRate = 0,
+  statusDistribution = {},
+  userMetrics = {}
+}) {
   const pendingOrders = statusDistribution?.pending || 0;
   const processingOrders = statusDistribution?.processing || 0;
   const completedOrders = statusDistribution?.completed || 0;
   const cancelledOrders = statusDistribution?.cancelled || 0;
   const totalAllOrders = pendingOrders + processingOrders + completedOrders + cancelledOrders;
-  const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : 0;
+  const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : '0.00';
+
+  const totalUsers = userMetrics?.totalUsers || 0;
+  const activeBuyers = userMetrics?.activeBuyers || 0;
+  const conversionRate = userMetrics?.conversionRate || 0;
 
   return (
     <div className="stats-cards">
@@ -16,7 +28,9 @@ function StatsCards({ totalRevenue, totalOrders, statusDistribution }) {
         <div className="stat-content">
           <h3>Total Revenue</h3>
           <p className="stat-value">${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          <p className="stat-label">From {totalOrders} completed orders</p>
+          <p className="stat-label">
+            From {totalOrders} completed · ${pendingRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} in pipeline
+          </p>
         </div>
       </div>
 
@@ -26,7 +40,7 @@ function StatsCards({ totalRevenue, totalOrders, statusDistribution }) {
           <h3>Total Orders</h3>
           <p className="stat-value">{totalAllOrders}</p>
           <p className="stat-label">
-            {completedOrders} completed, {pendingOrders} pending
+            {completionRate}% completed · {cancellationRate}% cancelled
           </p>
         </div>
       </div>
@@ -35,8 +49,19 @@ function StatsCards({ totalRevenue, totalOrders, statusDistribution }) {
         <div className="stat-icon">📊</div>
         <div className="stat-content">
           <h3>Avg Order Value</h3>
-          <p className="stat-value">${avgOrderValue}</p>
+          <p className="stat-value">${Number(avgOrderValue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           <p className="stat-label">Per completed order</p>
+        </div>
+      </div>
+
+      <div className="stat-card users">
+        <div className="stat-icon">👥</div>
+        <div className="stat-content">
+          <h3>Users & Buyers</h3>
+          <p className="stat-value">{totalUsers}</p>
+          <p className="stat-label">
+            {activeBuyers} active buyers ({conversionRate}% conversion)
+          </p>
         </div>
       </div>
 
@@ -48,6 +73,7 @@ function StatsCards({ totalRevenue, totalOrders, statusDistribution }) {
             <span className="status-item completed">{completedOrders} Completed</span>
             <span className="status-item pending">{pendingOrders} Pending</span>
             <span className="status-item processing">{processingOrders} Processing</span>
+            <span className="status-item cancelled">{cancelledOrders} Cancelled</span>
           </div>
         </div>
       </div>

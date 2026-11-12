@@ -16,15 +16,42 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-    setLoading(false);
+    let isMounted = true;
+
+    const initAuth = async () => {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+
+      if (token && userData) {
+        try {
+          setUser(JSON.parse(userData));
+        } catch {
+          localStorage.removeItem('user');
+        }
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+        try {
+          const response = await api.get('/auth/me');
+          if (isMounted && response.data?.user) {
+            setUser(response.data.user);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+          }
+        } catch (err) {
+          // 401 is handled by api response interceptor; keep cached user on transient errors
+          console.warn('Could not refresh user session:', err.message);
+        }
+      }
+
+      if (isMounted) {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const login = async (email, password) => {

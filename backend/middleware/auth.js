@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Middleware to verify JWT token
+// Middleware to verify JWT token and hydrate current user role from DB
 const authenticate = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -11,7 +11,18 @@ const authenticate = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-change-in-production');
-    req.user = decoded;
+    const user = await User.findById(decoded.userId).select('username email role');
+
+    if (!user) {
+      return res.status(401).json({ message: 'User account not found, authorization denied' });
+    }
+
+    req.user = {
+      userId: user._id.toString(),
+      username: user.username,
+      email: user.email,
+      role: user.role
+    };
     next();
   } catch (error) {
     res.status(401).json({ message: 'Token is not valid' });
@@ -19,19 +30,11 @@ const authenticate = async (req, res, next) => {
 };
 
 // Middleware to check if user is admin
-const isAdmin = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user.userId);
-    
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
-    }
-    
-    req.user.role = user.role;
-    next();
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+const isAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
   }
+  next();
 };
 
 module.exports = { authenticate, isAdmin };

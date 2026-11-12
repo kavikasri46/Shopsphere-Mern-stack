@@ -138,11 +138,13 @@ app.get('/api/health', (req, res) => {
 const authRoutes = require('./routes/auth');
 const orderRoutes = require('./routes/orders');
 const analyticsRoutes = require('./routes/analytics');
+const userRoutes = require('./routes/users');
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/users', userRoutes);
 
 // Export app for Vercel serverless function
 module.exports = app;

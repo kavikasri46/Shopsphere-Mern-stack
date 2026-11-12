@@ -160,9 +160,14 @@ router.put('/:id', authenticate, async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
+    const updates = {};
+    if (req.body.product !== undefined) updates.product = req.body.product;
+    if (req.body.amount !== undefined) updates.amount = req.body.amount;
+    if (req.body.status !== undefined) updates.status = req.body.status;
+
     const updatedOrder = await Order.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updates,
       { new: true, runValidators: true }
     ).populate('userId', 'username email');
 
